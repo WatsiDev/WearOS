@@ -10,14 +10,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun BarraVida(vida: Float) {
+fun BarraVida(
+    hpActual: Int,
+    hpMax: Int,
+    modifier: Modifier = Modifier
+) {
+    val progress = if (hpMax > 0) hpActual.toFloat() / hpMax else 0f
+
     LinearProgressIndicator(
-    progress = { vida },
-    modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(6.dp),
-    color = Color.Red,
-    trackColor = ProgressIndicatorDefaults.linearTrackColor,
-    strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
+        progress = { progress },
+        modifier = modifier
+            .fillMaxWidth(0.8f)
+            .height(6.dp),
+        color = Color.Red,
+        trackColor = ProgressIndicatorDefaults.linearTrackColor,
+        strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
     )
 }
+
+

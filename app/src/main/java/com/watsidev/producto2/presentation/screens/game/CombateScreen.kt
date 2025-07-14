@@ -1,146 +1,300 @@
 package com.watsidev.producto2.presentation.screens.game
 
-import android.os.Build
+import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
+import androidx.wear.tooling.preview.devices.WearDevices
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.gif.GifDecoder
 import com.watsidev.producto2.R
+import kotlinx.coroutines.delay
+import okhttp3.internal.notifyAll
 
 @Composable
-fun CombateScreen(
+fun CombatScreen(
     idPokemon: Int,
-    onFinBatalla: () -> Unit
+    onFinBatalla: () -> Unit,
+    goResults: (String, Int) -> Unit,
+    viewModel: CombatViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    ReproducirMusica(R.raw.battle_gym)
+    LaunchedEffect(idPokemon) {
+        viewModel.iniciarCombate(idPokemon)
+    }
     val context = LocalContext.current
-    val imageLoader = remember {
-        ImageLoader.Builder(context)
-            .components {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                    add(GifDecoder.Factory())
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        BackgroundCombat()
+
+        Column {
+            uiState.enemyPokemon?.let {
+                EnemyPokemon(
+                    enemyPokemon = it,
+                    hpActual = uiState.enemyHp,
+                    hpMax = uiState.enemyHpMax
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            uiState.myPokemon?.let {
+                MyPokemon(
+                    context = context,
+                    myPokemon = it,
+                    hpActual = uiState.myHp,
+                    hpMax = uiState.myHpMax,
+                    onMoveSelected = { move ->
+                        viewModel.atacar(move)
+                    }
+                )
+            }
+
+            uiState.winnerMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+                Button(onClick = {
+                    viewModel.reset()
+                    onFinBatalla()
+                }) {
+                    Text("Volver")
                 }
             }
-            .build()
+            LaunchedEffect(uiState.winnerMessage) {
+                uiState.winnerMessage?.let {
+                    delay(2000) // tiempo para mostrar mensaje en la pantalla de combate
+                    goResults(
+                        uiState.winnerMessage!!,
+                        uiState.myPokemon!!.id
+                    )
+                }
+            }
+        }
     }
 
-    val miPokemon = when (idPokemon) {
-        1 -> Pokemon(1, "Charmander", R.drawable.gengar)
-        2 -> Pokemon(2, "Squirtle", R.drawable.gengar)
-        3 -> Pokemon(3, "Bulbasaur", R.drawable.gengar)
-        else -> Pokemon(0, "MissingNo", R.drawable.gengar)
-    }
+}
 
-    val enemigo = Pokemon(99, "Pidgey", R.drawable.gengar)
-
-    var state by remember { mutableStateOf(CombateState()) }
-
+@Composable
+fun EnemyPokemon(
+    enemyPokemon: Pokemon,
+    hpActual: Int,
+    hpMax: Int
+) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp),
-        verticalArrangement = Arrangement.SpaceEvenly,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp)
     ) {
-
-        // 🟥 Enemigo
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = enemigo.nombre, fontWeight = FontWeight.Bold)
-            BarraVida(vida = state.vidaEnemigo)
-            Spacer(modifier = Modifier.height(4.dp))
-            AsyncImage(
-                model = enemigo.imagenRes,
-                imageLoader = imageLoader,
-                contentDescription = enemigo.nombre,
-                modifier = Modifier.size(48.dp)
-            )
-        }
-
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 6.dp),
-            thickness = DividerDefaults.Thickness,
-            color = DividerDefaults.color
+        BarraVida(
+            hpActual = hpActual,
+            hpMax = hpMax,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+        Text(
+            enemyPokemon.name,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Image(
+            painterResource(enemyPokemon.spriteFront),
+            contentDescription = enemyPokemon.name,
+            modifier = Modifier
+                .align(Alignment.End)
+                .size(44.dp)
+        )
+    }
+}
 
-        // 🟦 Propio Pokémon
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            AsyncImage(
-                model = miPokemon.imagenRes,
-                imageLoader = imageLoader,
-                contentDescription = miPokemon.nombre,
-                modifier = Modifier.size(48.dp)
+
+@Composable
+fun MyPokemon(
+    myPokemon: Pokemon,
+    hpActual: Int,
+    hpMax: Int,
+    onMoveSelected: (String) -> Unit,
+    context: Context
+) {
+    var showMoves by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Image(
+                painterResource(myPokemon.spriteBack),
+                contentDescription = myPokemon.name,
+                modifier = Modifier
+                    .padding(start = 21.dp)
+                    .size(64.dp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            BarraVida(vida = state.vidaPropia)
-            Text(text = miPokemon.nombre, fontWeight = FontWeight.Medium)
+
+            BarraVida(
+                hpActual = hpActual,
+                hpMax = hpMax,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+
+            Row(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    myPokemon.name,
+                    color = Color.Black
+                )
+                Button(
+                    onClick = {
+                        showMoves = !showMoves
+                        reproducirEfecto(context, R.raw.select_sound)
+                    },
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.height(25.dp)
+                ) {
+                    Text("Acción", fontSize = 12.sp)
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        AnimatedVisibility(
+            visible = showMoves,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        ) {
+            AtaquesGrid(
+                moves = myPokemon.moves,
+                onMoveSelected = {
+                    onMoveSelected(it)
+                    showMoves = false
+                },
+                pokemonCry = myPokemon.cry,
+                context = context
+            )
+        }
+    }
+}
 
-        // 🎯 Acciones
-        state.mensajeFinal?.let { mensaje ->
-            Text(text = mensaje, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Button(onClick = { onFinBatalla() }) {
-                Text("Volver")
-            }
-        } ?: if (state.mostrarOpciones) {
-            Column {
-                listOf("Ataque Rápido", "Lanzallamas", "Gruñido", "Placaje").forEach { ataque ->
-                    Button(
-                        onClick = {
-                            // Simula golpe
-                            val nuevaVidaEnemigo = (state.vidaEnemigo - 0.3f).coerceAtLeast(0f)
-                            val nuevaVidaPropia = (state.vidaPropia - 0.2f).coerceAtLeast(0f)
 
-                            val fin = when {
-                                nuevaVidaEnemigo == 0f -> "¡Ganaste!"
-                                nuevaVidaPropia == 0f -> "¡Perdiste!"
-                                else -> null
+@Composable
+fun AtaquesGrid(
+    moves: List<String>,
+    onMoveSelected: (String) -> Unit,
+    pokemonCry: Int,
+    context: Context
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .background(Color.White.copy(alpha = 0.9f)),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Column {
+            for (i in moves.indices step 2) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    for (j in 0..1) {
+                        if (i + j < moves.size) {
+                            Button(
+                                onClick = {
+                                    onMoveSelected(moves[i + j])
+                                    reproducirEfecto(context, pokemonCry)
+                                },
+                                shape = RoundedCornerShape(4.dp),
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .height(25.dp)
+                                    .weight(1f)
+                            ) {
+                                Text(moves[i + j], fontSize = 12.sp)
                             }
-
-                            state = state.copy(
-                                vidaEnemigo = nuevaVidaEnemigo,
-                                vidaPropia = nuevaVidaPropia,
-                                mostrarOpciones = false,
-                                mensajeFinal = fin
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 2.dp)
-                    ) {
-                        Text(ataque)
+                        }
                     }
                 }
             }
-        } else {
-            Button(onClick = { state = state.copy(mostrarOpciones = true) }) {
-                Text("Acción")
-            }
         }
+    }
+}
+
+@Composable
+fun BackgroundCombat() {
+    Image(
+        painter = painterResource(R.drawable.combat_scenary_one),
+        contentDescription = "Fondo de combate",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .fillMaxWidth()
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(R.drawable.combat_background),
+            contentDescription = "Fondo de combate",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+        )
     }
 }

@@ -3,6 +3,7 @@ package com.watsidev.producto2.presentation
 import android.app.Application
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,13 +21,16 @@ import com.watsidev.producto2.presentation.navigation.HeartRate
 import com.watsidev.producto2.presentation.navigation.IMC
 import com.watsidev.producto2.presentation.navigation.Menu
 import com.watsidev.producto2.presentation.navigation.MusicPlayer
+import com.watsidev.producto2.presentation.navigation.ResultBattle
 import com.watsidev.producto2.presentation.navigation.Settings
 import com.watsidev.producto2.presentation.navigation.StepCounter
 import com.watsidev.producto2.presentation.navigation.Temporizer
 import com.watsidev.producto2.presentation.screens.calculator.CalculatorScreen
 import com.watsidev.producto2.presentation.screens.cover.CoverScreen
 import com.watsidev.producto2.presentation.screens.designs.DesignsScreen
-import com.watsidev.producto2.presentation.screens.game.CombateScreen
+import com.watsidev.producto2.presentation.screens.game.CombatScreen
+import com.watsidev.producto2.presentation.screens.game.PokemonList
+import com.watsidev.producto2.presentation.screens.game.ResultScreen
 import com.watsidev.producto2.presentation.screens.game.SeleccionPokemonScreen
 import com.watsidev.producto2.presentation.screens.heartRate.HeartRateScreen
 import com.watsidev.producto2.presentation.screens.imc.IMCScreen
@@ -48,7 +52,7 @@ fun MainApp(
     ) {
         NavHost(
             navController = navController,
-            startDestination = Cover
+            startDestination = Game
         ) {
             composable<Cover> {
                 CoverScreen(
@@ -90,17 +94,47 @@ fun MainApp(
                 StepCounterScreen()
             }
             composable<Game> {
+                val pokemonRandom = remember {
+                    PokemonList.shuffled().take(3)
+                }
                 SeleccionPokemonScreen(
                     onPokemonConfirmado = { pokemon ->
                         navController.navigate(Fight(pokemon))
-                    }
+                    },
+                    pokemonList = pokemonRandom
                 )
             }
             composable<Fight> { backStackEntry ->
                 val fight: Fight = backStackEntry.toRoute()
-                CombateScreen(
+                CombatScreen(
                     idPokemon = fight.id,
-                    onFinBatalla = { navController.navigate(Game) }
+                    onFinBatalla = { navController.navigate(Game) },
+                    goResults = { message, id -> navController.navigate(ResultBattle(message = message, id = id)) {
+                        popUpTo(Game) { inclusive= false }
+                    } }
+                )
+            }
+            composable<ResultBattle> { backStackEntry ->
+                val resultBattle: ResultBattle = backStackEntry.toRoute()
+                ResultScreen(
+                    idPokemon = resultBattle.id,
+                    mensaje = resultBattle.message,
+                    onReintentar = { id ->
+                        navController.navigate(Fight(id)) {
+                            popUpTo(Game) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    onSeleccionarOtro = {
+                        navController.navigate(Game) {
+                            popUpTo(Game) {
+                                inclusive = false // ← Conserva Game, limpia lo demás
+                            }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
         }

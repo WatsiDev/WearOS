@@ -39,3 +39,9 @@ object Game
 data class Fight(
     val id: Int,
 )
+
+@Serializable
+data class ResultBattle(
+    val message: String,
+    val id: Int
+)
