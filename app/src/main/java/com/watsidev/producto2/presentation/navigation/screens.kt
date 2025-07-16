@@ -21,6 +21,18 @@ object Settings
 object Designs
 
 @Serializable
+object Designs2
+
+@Serializable
+object Designs3
+
+@Serializable
+object Designs4
+
+@Serializable
+object Designs5
+
+@Serializable
 object HeartRate
 
 @Serializable
@@ -45,3 +57,9 @@ data class ResultBattle(
     val message: String,
     val id: Int
 )
+
+@Serializable
+object Maps
+
+@Serializable
+object Compass

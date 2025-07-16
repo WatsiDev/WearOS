@@ -10,35 +10,45 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DoubleArrow
-import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.RestartAlt
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
-import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
-import androidx.wear.tooling.preview.devices.WearDevices
 import com.watsidev.producto2.R
 
 @Composable
 fun ResultScreen(
     idPokemon: Int,
     mensaje: String,
+    viewModel: StatsViewModel,
     onReintentar: (Int) -> Unit,
     onSeleccionarOtro: () -> Unit,
 ) {
+    val stats by viewModel.stats.collectAsState()
     val myPokemon = PokemonList.firstOrNull { it.id == idPokemon } ?: return
+
+    // Reproducir música de victoria si aplica
     if (mensaje == "¡Ganaste!") ReproducirMusica(R.raw.victory)
+
+    // Actualizar estadísticas UNA VEZ al entrar
+    LaunchedEffect(mensaje) {
+        viewModel.actualizarStats(mensaje)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -50,6 +60,7 @@ fun ResultScreen(
             modifier = Modifier
                 .fillMaxSize()
         )
+
         ScalingLazyColumn(
             modifier = Modifier
                 .background(Color.Gray.copy(alpha = 0.5f))
@@ -59,9 +70,11 @@ fun ResultScreen(
         ) {
             item {
                 Text(
-                    mensaje
+                    text = mensaje,
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
+
             item {
                 Image(
                     painterResource(myPokemon.spriteFront),
@@ -70,9 +83,10 @@ fun ResultScreen(
                         .size(64.dp)
                 )
             }
+
             item {
                 IconButton(
-                    onClick =  {
+                    onClick = {
                         if (mensaje == "¡Ganaste!") {
                             onReintentar(idPokemon)
                         } else {
@@ -81,11 +95,12 @@ fun ResultScreen(
                     }
                 ) {
                     Icon(
-                        if (mensaje == "¡Ganaste!") Icons.Outlined.DoubleArrow else Icons.Outlined.RestartAlt ,
+                        imageVector = if (mensaje == "¡Ganaste!") Icons.Outlined.DoubleArrow else Icons.Outlined.RestartAlt,
                         contentDescription = null
                     )
                 }
             }
+
             item {
                 Column(
                     modifier = Modifier
@@ -93,15 +108,9 @@ fun ResultScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        "Total de juegos: 4"
-                    )
-                    Text(
-                        "Juegos ganados: 4"
-                    )
-                    Text(
-                        "Puntos: 450"
-                    )
+                    Text("Total de juegos: ${stats.totalCombates}")
+                    Text("Juegos ganados: ${stats.victorias}/${stats.totalCombates}")
+                    Text("Puntos: ${stats.puntos}")
                 }
             }
         }

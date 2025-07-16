@@ -10,12 +10,14 @@ import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.watsidev.producto2.presentation.navigation.Calculator
 import com.watsidev.producto2.presentation.navigation.Designs
 import com.watsidev.producto2.presentation.navigation.Game
 import com.watsidev.producto2.presentation.navigation.HeartRate
 import com.watsidev.producto2.presentation.navigation.IMC
+import com.watsidev.producto2.presentation.navigation.Maps
 import com.watsidev.producto2.presentation.navigation.MusicPlayer
 import com.watsidev.producto2.presentation.navigation.Settings
 import com.watsidev.producto2.presentation.navigation.StepCounter
@@ -55,30 +57,36 @@ val listApps = listOf(
     ),
     Apps(
         5,
+        "Maps",
+        Icons.Outlined.Navigation,
+        Maps
+    ),
+    Apps(
+        6,
         "Pokémon Game",
         Icons.Default.Gamepad, // Placeholder icon, replace with actual game icon
         Game
     ),
     Apps(
-        6,
+        7,
         "Heart Rate",
         Icons.Default.Favorite, // Placeholder icon, replace with actual settings icon
         HeartRate // Placeholder for settings route, replace with actual route if needed
     ),
     Apps(
-        7,
+        8,
         "IMC",
         Icons.Default.MonitorWeight, // Placeholder icon, replace with actual settings icon
         IMC // Placeholder for settings route, replace with actual route if needed
     ),
     Apps(
-        8,
+        9,
         "Temporizer",
         Icons.Default.Timer, // Placeholder icon, replace with actual settings icon
         Temporizer // Placeholder for settings route, replace with actual route if needed
     ),
     Apps(
-        9,
+        10,
         "Step Counter",
         Icons.AutoMirrored.Filled.DirectionsWalk, // Placeholder icon, replace with actual settings icon
         StepCounter // Placeholder for settings route, replace with actual route if needed
