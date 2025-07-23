@@ -63,3 +63,9 @@ object Maps
 
 @Serializable
 object Compass
+
+@Serializable
+object TaskList
+
+@Serializable
+object TaskListView

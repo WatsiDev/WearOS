@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.Task
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.watsidev.producto2.presentation.navigation.Calculator
 import com.watsidev.producto2.presentation.navigation.Designs
@@ -21,6 +22,7 @@ import com.watsidev.producto2.presentation.navigation.Maps
 import com.watsidev.producto2.presentation.navigation.MusicPlayer
 import com.watsidev.producto2.presentation.navigation.Settings
 import com.watsidev.producto2.presentation.navigation.StepCounter
+import com.watsidev.producto2.presentation.navigation.TaskList
 import com.watsidev.producto2.presentation.navigation.Temporizer
 
 data class Apps(
@@ -90,5 +92,11 @@ val listApps = listOf(
         "Step Counter",
         Icons.AutoMirrored.Filled.DirectionsWalk, // Placeholder icon, replace with actual settings icon
         StepCounter // Placeholder for settings route, replace with actual route if needed
+    ),
+    Apps(
+        11,
+        "ToDo List",
+        Icons.Outlined.Task,
+        TaskList
     )
 )

@@ -32,6 +32,8 @@ import com.watsidev.producto2.presentation.navigation.MusicPlayer
 import com.watsidev.producto2.presentation.navigation.ResultBattle
 import com.watsidev.producto2.presentation.navigation.Settings
 import com.watsidev.producto2.presentation.navigation.StepCounter
+import com.watsidev.producto2.presentation.navigation.TaskList
+import com.watsidev.producto2.presentation.navigation.TaskListView
 import com.watsidev.producto2.presentation.navigation.Temporizer
 import com.watsidev.producto2.presentation.screens.calculator.CalculatorScreen
 import com.watsidev.producto2.presentation.screens.cover.CoverScreen
@@ -55,6 +57,8 @@ import com.watsidev.producto2.presentation.screens.menu.listApps
 import com.watsidev.producto2.presentation.screens.musicPlayer.MusicPlayerScreen
 import com.watsidev.producto2.presentation.screens.settings.SettingsScreen
 import com.watsidev.producto2.presentation.screens.stepCounter.StepCounterScreen
+import com.watsidev.producto2.presentation.screens.taskList.TaskListScreen
+import com.watsidev.producto2.presentation.screens.taskList.TaskScreen
 import com.watsidev.producto2.presentation.screens.temporizer.TemporizerScreen
 
 @Composable
@@ -172,6 +176,14 @@ fun MainApp(
                         }
                     }
                 )
+            }
+            composable<TaskList> {
+                TaskScreen(
+                    onClick = { navController.navigate(TaskListView) }
+                )
+            }
+            composable<TaskListView> {
+                TaskListScreen()
             }
         }
     }
