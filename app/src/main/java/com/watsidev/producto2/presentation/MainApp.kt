@@ -32,7 +32,7 @@ import com.watsidev.producto2.presentation.navigation.MusicPlayer
 import com.watsidev.producto2.presentation.navigation.ResultBattle
 import com.watsidev.producto2.presentation.navigation.Settings
 import com.watsidev.producto2.presentation.navigation.StepCounter
-import com.watsidev.producto2.presentation.navigation.TaskList
+import com.watsidev.producto2.presentation.navigation.TaskForm
 import com.watsidev.producto2.presentation.navigation.TaskListView
 import com.watsidev.producto2.presentation.navigation.Temporizer
 import com.watsidev.producto2.presentation.screens.calculator.CalculatorScreen
@@ -177,13 +177,18 @@ fun MainApp(
                     }
                 )
             }
-            composable<TaskList> {
+            composable<TaskForm> {
+                val taskForm: TaskForm = it.toRoute()
                 TaskScreen(
-                    onClick = { navController.navigate(TaskListView) }
+                    onTaskSaved = { navController.navigate(TaskListView) },
+                    id = taskForm.id
                 )
             }
             composable<TaskListView> {
-                TaskListScreen()
+                TaskListScreen(
+                    onAddTask = { navController.navigate(TaskForm(id = null)) },
+                    onEditTask = { id -> navController.navigate(TaskForm(id = id)) }
+                )
             }
         }
     }

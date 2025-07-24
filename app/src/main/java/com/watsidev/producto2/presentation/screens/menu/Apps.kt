@@ -22,7 +22,7 @@ import com.watsidev.producto2.presentation.navigation.Maps
 import com.watsidev.producto2.presentation.navigation.MusicPlayer
 import com.watsidev.producto2.presentation.navigation.Settings
 import com.watsidev.producto2.presentation.navigation.StepCounter
-import com.watsidev.producto2.presentation.navigation.TaskList
+import com.watsidev.producto2.presentation.navigation.TaskListView
 import com.watsidev.producto2.presentation.navigation.Temporizer
 
 data class Apps(
@@ -97,6 +97,6 @@ val listApps = listOf(
         11,
         "ToDo List",
         Icons.Outlined.Task,
-        TaskList
+        TaskListView
     )
 )

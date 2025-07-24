@@ -65,7 +65,9 @@ object Maps
 object Compass
 
 @Serializable
-object TaskList
+data class TaskForm(
+    val id: Int?
+)
 
 @Serializable
 object TaskListView
